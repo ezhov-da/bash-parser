@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package ru.ezhov.bashparser;
 
 import java.io.File;
@@ -31,6 +36,8 @@ public class Parser
     public static final int WRITE_ONE_FILE = 0;
     /** каждую страницу пишем в отдельный файл */
     public static final int WRITE_MANY_FILE = 1;
+    /** чтение только одной страницы в общий файл */
+    public static final int WRITE_ONE_PAGE = 2;
     /** страница с котрой необходимо парсить */
     private static int pageFrom;
     /** страница по которую нужно парсить включительно */
@@ -74,6 +81,9 @@ public class Parser
                 break;
             case WRITE_MANY_FILE:
                 parser.readAndWrite();
+                break;
+            case WRITE_ONE_PAGE:
+                parser.readAndWriteOnePage();
                 break;
             default:
                 throw new IllegalArgumentException("неверный параметр");
@@ -130,13 +140,45 @@ public class Parser
                 for (Element element : elements)
                 {
                     org.w3c.dom.Element eNodeXml = docXml.createElement(node); //создали узел
-                    eNodeXml.appendChild(docXml.createTextNode(element.text())); //добавили текст в узел
+                    eNodeXml.appendChild(docXml.createTextNode(element.html())); //добавили текст в узел
                     eRootXml.appendChild(eNodeXml); //добавили узел в корень
 
                 }
                 write(i); //записываем файл
             }
 
+        }
+
+    }
+
+    /**
+     * читаем и пишим данные в один файл одну страницу
+     */
+    private void readAndWriteOnePage() throws TransformerException, IOException, ParserConfigurationException
+    {
+
+        docBuilder = docFactory.newDocumentBuilder();//создали записывающий объект
+        docXml = docBuilder.newDocument(); //создали документ
+
+        //получаем страницу
+        Document doc = Jsoup.connect(website).get();
+        //получаем элементы
+        Elements elements = doc.select(clazz);
+        if (!elements.isEmpty()) //если список элементов не пустой
+        {
+            docXml = docBuilder.newDocument(); //создали документ
+
+            org.w3c.dom.Element eRootXml = docXml.createElement(rootXml); //создали основной корень
+            docXml.appendChild(eRootXml);   //добавляем корен в документ
+            //проходимся циклом по элементам
+            for (Element element : elements)
+            {
+                org.w3c.dom.Element eNodeXml = docXml.createElement(node); //создали узел
+                eNodeXml.appendChild(docXml.createTextNode(element.html())); //добавили текст в узел
+                eRootXml.appendChild(eNodeXml); //добавили узел в корень
+
+            }
+            write(nameCommonFile); //записываем файл
         }
 
     }
@@ -174,7 +216,7 @@ public class Parser
                 for (Element element : elements)
                 {
                     org.w3c.dom.Element eNodeXml = docXml.createElement(node); //создали узел
-                    eNodeXml.appendChild(docXml.createTextNode(element.text())); //добавили текст в узел
+                    eNodeXml.appendChild(docXml.createTextNode(element.html())); //добавили текст в узел
                     eRootXml.appendChild(eNodeXml); //добавили узел в корень
 
                 }

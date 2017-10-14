@@ -16,7 +16,7 @@ public final class Settings
     {
     }
     /** файл с настройками приложения */
-    private final static String nameIninFile = "bash.properties";
+    private final static String nameIninFile = "bash.ini";
     /** класс с настройками, считывается каждый раз при обращении */
     private final static Properties properties = new Properties();
     private static FileInputStream inputStream;
